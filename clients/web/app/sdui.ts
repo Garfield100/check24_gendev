@@ -7,7 +7,7 @@ export interface StringData {
 }
 
 export interface ButtonData {
-  className: string;
+  className?: string;
   kind: "button";
   text: string;
   action?: string; // has to be a string for serialisation
