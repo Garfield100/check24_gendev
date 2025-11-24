@@ -1,0 +1,5 @@
+_:
+    @just --list
+
+build:
+    npm run build

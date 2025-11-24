@@ -1,14 +1,34 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use std::{collections::HashMap, sync::Arc};
+
+use domain::{Personalisation, Product, UserID, Widget, WidgetRepository};
+use fred::clients::Pool;
+
+#[derive(Debug, Clone)]
+pub struct WidgetCache {
+    l1: Arc<HashMap<(Product, Personalisation), Widget>>,
+    l2: Pool, // Pool type already an Arc
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+impl WidgetRepository for WidgetCache {
+    fn get_widgets_for_user(
+        &self,
+        user_id: UserID,
+    ) -> impl Future<Output = Result<Vec<Widget>, anyhow::Error>> + Send {
+        todo!()
+    }
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn upsert(
+        &mut self,
+        widget: Widget,
+    ) -> impl Future<Output = Result<Option<Widget>, anyhow::Error>> + Send {
+        todo!()
+    }
+
+    fn remove(
+        &mut self,
+        product: Product,
+        personalisation: domain::Personalisation,
+    ) -> impl Future<Output = Result<Widget, anyhow::Error>> + Send {
+        todo!()
     }
 }
