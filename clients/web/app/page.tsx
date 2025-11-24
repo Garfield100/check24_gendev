@@ -15,40 +15,68 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 
+import { SDUIComponentData, CardData, ButtonData } from "@/app/sdui"
 
-function testCard(className: string = "") {
+
+function renderSDUI(componentData: SDUIComponentData) {
+  // no native pattern matching :(
+  switch (componentData.kind) {
+    case "string":
+      return componentData.text
+    
+    case "card":
+      return renderCard(componentData)
+
+    case "button":
+      return renderButton
+  }
+}
+
+
+function renderCard(cardData: CardData) {
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle>Card Title</CardTitle>
-        <CardDescription>Card Description</CardDescription>
-        <CardAction>Card Action</CardAction>
-      </CardHeader>
-      <CardContent>
-        <p>Card Content</p>
-      </CardContent>
-      <CardFooter>
-        <p>Card Footer</p>
-      </CardFooter>
+    <Card className={cardData.className}>
+      {
+        cardData.header && (
+          <CardHeader>
+
+            {cardData.header.title && (<CardTitle>{cardData.header.title}</CardTitle>)}
+
+            {cardData.header.description && (<CardDescription>{cardData.header.description}</CardDescription>)}
+
+            {cardData.header.action && (<CardAction>{renderSDUI(cardData.header.action)}</CardAction>)}
+
+          </CardHeader>
+        )
+      }
+
+
+      {cardData.content && (
+        <CardContent>
+          {renderSDUI(cardData.content)}
+        </CardContent>
+      )}
+
+      {cardData.footer && (
+        <CardFooter>
+          {renderSDUI(cardData.footer)}
+        </CardFooter>
+      )}
+
     </Card>
   )
+}
+
+function renderButton(buttonData: ButtonData) {
+  // TODO
 }
 
 export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-4xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Carousel className="w-full">
-          <CarouselContent>
-            <CarouselItem className="basis-1/3">{testCard()}</CarouselItem>
-            <CarouselItem className="basis-1/3">{testCard("dark")}</CarouselItem>
-            <CarouselItem className="basis-1/3">{testCard()}</CarouselItem>
-            <CarouselItem className="basis-1/3">{testCard()}</CarouselItem>
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
         
+
 
       </main>
     </div>

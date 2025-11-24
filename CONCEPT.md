@@ -11,6 +11,9 @@
 
 * recommendation api should be one aggregated request for all products (i.e. the client does not send one request per product but only one for the user)
 
+* data collection? What e.g. behavioural analytics should maybe be reported back to products & how? Is this in scope of the challenge?
+  * scope: "conversion takes more than speed", "creativity"
+
 ## Architectural choices
 
 ### Hexagonal architecture pattern
@@ -35,12 +38,15 @@ Going with two caches:
       * no requests to the product backend when there are no changes to report
     * cons:
       * cache updates happen even when the user is not around & might not see them because a subsequent update overwrites it before the user logs in again
-      * 
+    * fazit:
+      * I believe this to be a worthy trade-off. Products are in control of how many updates they push and when. More importantly, I wager users returning after a long time are more likely to have juicy contract upgrades or offers waiting for them. Having a cold cache and serving non-personalised recommendations on this first view could be a massive lost opportunity.
+      * This way the only people shown generic data (after a cache warmup cycle) should be newly registered users which likely don't have much in terms of personalised data anyway.
 
 ### Server-driven UI
 
-json description of UI, front-end renders that instead of having templates for every product -> "content updates can and should remain dynamic"
-
+* pre-rendered HTML would be maximally flexible but wouldn't work well with the native app
+* json description of UI, front-end renders that instead of having templates for every product -> "content updates can and should remain dynamic"
+  * provide certain templates which can be combined recursively, e.g. carousels, cards, buttons, etc
 
 ## Tech choices
 
@@ -49,4 +55,7 @@ json description of UI, front-end renders that instead of having templates for e
 * Rust ofc
 * Axum:
   * Fast, estabilished, maintained, ergonomic, Tokio/Tower middleware ecosystem
-  * 
+
+### Web front end
+
+* ShadCN
