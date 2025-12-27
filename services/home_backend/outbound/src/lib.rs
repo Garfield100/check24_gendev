@@ -1,34 +1,45 @@
-use std::{collections::HashMap, sync::Arc};
+mod widget_cache;
+pub use widget_cache::WidgetCache;
 
-use domain::{Personalisation, Product, UserID, Widget, WidgetRepository};
-use fred::clients::Pool;
+use std::{sync::Arc, time::Duration};
 
-#[derive(Debug, Clone)]
-pub struct WidgetCache {
-    l1: Arc<HashMap<(Product, Personalisation), Widget>>,
-    l2: Pool, // Pool type already an Arc
+use anyhow::Result;
+use dashmap::DashMap;
+use domain::{Personalisation, Product, Widget, WidgetRepository};
+use fred::{clients::Pool, prelude::*};
+
+use assert2::{assert, check};
+
+#[tokio::test]
+async fn test_new() -> Result<()> {
+    let _cache = WidgetCache::new().await?;
+
+    Ok(())
 }
 
-impl WidgetRepository for WidgetCache {
-    fn get_widgets_for_user(
-        &self,
-        user_id: UserID,
-    ) -> impl Future<Output = Result<Vec<Widget>, anyhow::Error>> + Send {
-        todo!()
-    }
+#[tokio::test]
+async fn test_insert_read() -> Result<()> {
+    let mut cache = WidgetCache::new().await?;
+    cache.clear().await?;
 
-    fn upsert(
-        &mut self,
-        widget: Widget,
-    ) -> impl Future<Output = Result<Option<Widget>, anyhow::Error>> + Send {
-        todo!()
-    }
+    let test_widget = Widget {
+        product: Product::HorseInsurance,
+        data: "{}".to_string(),
+        personalisation: Personalisation(None),
+    };
 
-    fn remove(
-        &mut self,
-        product: Product,
-        personalisation: domain::Personalisation,
-    ) -> impl Future<Output = Result<Widget, anyhow::Error>> + Send {
-        todo!()
-    }
+    cache.upsert(&test_widget).await?;
+
+    let actual = cache
+        .get_widgets_for_user(&test_widget.personalisation)
+        .await?;
+
+    check!(actual.len() == 1);
+    check!(actual[0] == test_widget);
+
+    cache
+        .remove(test_widget.product, &test_widget.personalisation)
+        .await?;
+
+    Ok(())
 }

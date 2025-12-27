@@ -1,15 +1,31 @@
-use std::{collections::HashMap, path::Path};
+mod app_error;
 
-use axum::{extract, response};
+use std::{collections::HashMap, path::Path, sync::Arc};
+
+use axum::{
+    extract::{self, State},
+    response,
+};
 use config::Config;
-use serde_json::json;
+use domain::WidgetRepository;
+use domain::{HomeService, Personalisation, UserID};
+use outbound::WidgetCache;
+use serde_json::{Value, json};
 use tower_http::services::ServeDir;
 
+use tracing::{info, warn};
 use utoipa_axum::{router::OpenApiRouter, routes};
 use utoipa_swagger_ui::SwaggerUi;
 use uuid::Uuid;
 
+use crate::app_error::AppError;
+
 const DIST_PATH: &str = "../../../clients/web/out/";
+
+#[derive(Debug, Clone)]
+struct AppState {
+    home_service: Arc<HomeService<WidgetCache>>,
+}
 
 // #[tracing::instrument]
 #[tokio::main]
@@ -32,36 +48,68 @@ async fn main() -> anyhow::Result<()> {
         .routes(routes!(get_recommendations))
         .split_for_parts();
 
-    let app = app.merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()));
+    let app_state = AppState {
+        home_service: Arc::new(HomeService {
+            widget_cache: WidgetCache::new().await?,
+        }),
+    };
+
+    let app = app
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()))
+        .with_state(app_state);
 
     let local_bind: String = settings.get("local_bind")?;
     let listener = tokio::net::TcpListener::bind(&local_bind).await?;
-    println!("Starting server on http://{local_bind}");
+    info!("Starting server on http://{local_bind}");
     axum::serve(listener, app).await.unwrap();
+
+    // tokio::
 
     Ok(())
 }
 
-#[derive(Debug, utoipa::ToSchema, serde::Serialize, serde::Deserialize)]
-struct UserID(pub Uuid);
+// #[derive(Debug, utoipa::ToSchema, serde::Serialize, serde::Deserialize)]
+// struct UserID(pub Uuid);
 
 #[derive(Debug, utoipa::ToSchema, serde::Serialize, serde::Deserialize)]
 struct Recommendations {
-    user_id: UserID,
+    user_id: Uuid,
     recs_by_product: HashMap<String, serde_json::Value>,
 }
 
 // In a real environment this would be authenticated and authorised
-#[axum::debug_handler]
-#[utoipa::path(get, path = "/get_recommendations", responses((status = OK, body=Recommendations)))]
+#[axum::debug_handler] // no effect in release profile
+#[utoipa::path(get,
+    path = "/get_recommendations/{user_id}",
+    responses(
+        (status = OK, body=Recommendations)
+    ),
+    // params(
+    //     ("user_id" = Uuid, Path, description = "Get recommendations for user with the given UUID. If no user-specific rec is found, the generic one is returned immediately while a new recommendation is created for later.")
+    // )
+)]
 async fn get_recommendations(
-    extract::Path(user_id): extract::Path<UserID>,
+    State(state): State<AppState>,
+    extract::Path(user_id): extract::Path<Uuid>,
 ) -> response::Result<axum::Json<Recommendations>> {
-    let mut foo_recs = HashMap::new();
-    foo_recs.insert("foo".into(), json!({"foo": "bar"}));
+    // let mut foo_recs = HashMap::new();
+    // foo_recs.insert("foo".into(), json!({"foo": "bar"}));
+
+    let personalisation = Personalisation(Some(UserID(user_id)));
+    let recs = state
+        .home_service
+        .widget_cache
+        .get_widgets_for_user(&personalisation)
+        .await
+        .map_err(AppError)?;
+
+    let recs = recs
+        .into_iter()
+        .map(|w| (String::from(w.product), Value::from(w.data)))
+        .collect();
 
     Ok(axum::Json::from(Recommendations {
         user_id,
-        recs_by_product: foo_recs,
+        recs_by_product: recs,
     }))
 }

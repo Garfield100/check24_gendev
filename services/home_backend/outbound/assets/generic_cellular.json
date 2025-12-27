@@ -1,0 +1,60 @@
+{
+  "kind": "carousel",
+  "className": "",
+  "items": [
+    {
+      "kind": "card",
+      "className": "",
+      "header": {
+        "title": "Allnet Flat 20GB",
+        "description": "Vodafone Network"
+      },
+      "content": {
+        "kind": "string",
+        "className": "",
+        "text": "€9.99 / month - Cancel monthly"
+      },
+      "footer": {
+        "kind": "button",
+        "text": "Select Plan",
+        "action": "/mobile/plan/voda-20"
+      }
+    },
+    {
+      "kind": "card",
+      "className": "",
+      "header": {
+        "title": "Unlimited 5G",
+        "description": "Telekom Network"
+      },
+      "content": {
+        "kind": "string",
+        "className": "",
+        "text": "High speed internet, flat telephony"
+      },
+      "footer": {
+        "kind": "button",
+        "text": "View Deal",
+        "action": "/mobile/plan/telekom-unlimited"
+      }
+    },
+    {
+      "kind": "card",
+      "className": "",
+      "header": {
+        "title": "Prepaid Starter",
+        "description": "O2 Network"
+      },
+      "content": {
+        "kind": "string",
+        "className": "",
+        "text": "€10 starting credit included"
+      },
+      "footer": {
+        "kind": "button",
+        "text": "Order SIM",
+        "action": "/mobile/prepaid/o2"
+      }
+    }
+  ]
+}

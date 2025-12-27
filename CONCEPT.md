@@ -55,6 +55,9 @@ Going with two caches:
 * Rust ofc
 * Axum:
   * Fast, estabilished, maintained, ergonomic, Tokio/Tower middleware ecosystem
+* parking_lot
+* quick_cache
+  * fast, low-overhead, uses ahash (DOS resistant but fast hashing)
 
 ### Web front end
 

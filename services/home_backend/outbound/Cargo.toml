@@ -5,5 +5,13 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.100"
+assert2 = "0.3.16"
+dashmap = "6.1.0"
 domain = { version = "0.1.0", path = "../domain" }
 fred = "10.1.0"
+parking_lot = { version = "0.12.5", features = ["arc_lock", "send_guard"] }
+quick_cache = { version = "0.6.18", features = ["stats"] }
+serde = { version = "1.0.228", features = ["alloc"] }
+serde_json = "1.0.145"
+tokio = "1.48.0"
+uuid = { version = "1.18.1", features = ["serde"] }

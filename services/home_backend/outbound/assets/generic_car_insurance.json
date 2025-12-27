@@ -1,0 +1,47 @@
+{
+  "kind": "carousel",
+  "className": "",
+  "items": [
+    {
+      "kind": "card",
+      "className": "",
+      "header": {
+        "title": "VW Golf VII",
+        "description": "Haftpflicht + Teilkasko",
+        "action": {
+          "kind": "button",
+          "text": "Edit",
+          "action": "edit_vehicle_1"
+        }
+      },
+      "content": {
+        "kind": "string",
+        "className": "",
+        "text": "Save up to €250/year"
+      },
+      "footer": {
+        "kind": "button",
+        "text": "Compare Now",
+        "action": "/insurance/car/compare/vw-golf"
+      }
+    },
+    {
+      "kind": "card",
+      "className": "",
+      "header": {
+        "title": "Tesla Model 3",
+        "description": "Vollkasko protection"
+      },
+      "content": {
+        "kind": "string",
+        "className": "",
+        "text": "Tariffs from €18.50/month"
+      },
+      "footer": {
+        "kind": "button",
+        "text": "View Offers",
+        "action": "/insurance/car/compare/tesla-m3"
+      }
+    }
+  ]
+}

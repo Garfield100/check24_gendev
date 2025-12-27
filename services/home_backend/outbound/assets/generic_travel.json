@@ -1,0 +1,65 @@
+{
+  "kind": "carousel",
+  "className": "",
+  "items": [
+    {
+      "kind": "card",
+      "className": "",
+      "header": {
+        "title": "Paris, France",
+        "description": "The City of Light",
+        "action": {
+          "kind": "button",
+          "text": "Save",
+          "action": "save_paris"
+        }
+      },
+      "content": {
+        "kind": "string",
+        "className": "",
+        "text": "Direct flights from €120"
+      },
+      "footer": {
+        "kind": "button",
+        "text": "View Deals",
+        "action": "/travel/paris"
+      }
+    },
+    {
+      "kind": "card",
+      "className": "",
+      "header": {
+        "title": "Kyoto, Japan",
+        "description": "Ancient Temples & Nature"
+      },
+      "content": {
+        "kind": "string",
+        "className": "",
+        "text": "Spring Sale: -15% off"
+      },
+      "footer": {
+        "kind": "button",
+        "text": "Book Now",
+        "action": "/travel/kyoto"
+      }
+    },
+    {
+      "kind": "card",
+      "className": "",
+      "header": {
+        "title": "New York, USA",
+        "description": "The City That Never Sleeps"
+      },
+      "content": {
+        "kind": "string",
+        "className": "",
+        "text": "Package deals: Flight + Hotel"
+      },
+      "footer": {
+        "kind": "button",
+        "text": "Explore",
+        "action": "/travel/nyc"
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "kind": "carousel",
+  "className": "",
+  "items": [
+    {
+      "kind": "card",
+      "className": "",
+      "header": {
+        "title": "Horse Liability",
+        "description": "Basic Protection"
+      },
+      "content": {
+        "kind": "string",
+        "className": "",
+        "text": "€5M coverage from €5.25/mo"
+      },
+      "footer": {
+        "kind": "button",
+        "text": "Calculate",
+        "action": "/insurance/horse/liability"
+      }
+    },
+    {
+      "kind": "card",
+      "className": "",
+      "header": {
+        "title": "Surgery Cover (OP)",
+        "description": "Premium Protection"
+      },
+      "content": {
+        "kind": "string",
+        "className": "",
+        "text": "100% cost coverage, no limit"
+      },
+      "footer": {
+        "kind": "button",
+        "text": "View Details",
+        "action": "/insurance/horse/surgery"
+      }
+    }
+  ]
+}
