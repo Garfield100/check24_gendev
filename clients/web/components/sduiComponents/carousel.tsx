@@ -10,7 +10,7 @@ import { SDUIRenderer } from "./renderer";
 
 export function SDUICarousel({ data }: { data: import("@/app/sdui").CarouselData }) {
   return (
-    <Carousel className={data.className}>
+    <Carousel className={data.className} style={data.style}>
       <CarouselContent>
         {data.items.map((item, index) => (
           // We assume basic responsive basis classes here, but these could also come from data.className on the item itself if you expand the types

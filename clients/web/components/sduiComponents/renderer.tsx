@@ -1,4 +1,4 @@
-import { SDUIComponentData } from "../sdui";
+import { SDUIComponentData } from "../../app/sdui";
 import { SDUIButton } from "./button";
 import { SDUICard } from "./card";
 import { SDUICarousel } from "./carousel";

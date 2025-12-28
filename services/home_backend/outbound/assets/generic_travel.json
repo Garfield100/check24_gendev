@@ -8,11 +8,7 @@
       "header": {
         "title": "Paris, France",
         "description": "The City of Light",
-        "action": {
-          "kind": "button",
-          "text": "Save",
-          "action": "save_paris"
-        }
+        "action": {}
       },
       "content": {
         "kind": "string",

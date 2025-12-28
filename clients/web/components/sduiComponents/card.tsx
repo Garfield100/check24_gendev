@@ -8,18 +8,19 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { SDUIRenderer } from "./renderer";
+import { cn } from "@/lib/utils"
 
 export function SDUICard({ data }: { data: import("@/app/sdui").CardData }) {
   return (
-    <Card className={data.className}>
+    <Card className={cn("h-full", data.className)} style={data.style}>
       {data.header && (
         <CardHeader>
           {data.header.title && <CardTitle>{data.header.title}</CardTitle>}
-          
+
           {data.header.description && (
             <CardDescription>{data.header.description}</CardDescription>
           )}
-          
+
           {/* Recursive rendering for the header action */}
           {data.header.action && (
             <div className="mt-2">

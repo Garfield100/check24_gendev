@@ -1,20 +1,25 @@
+import { CSSProperties } from "react";
+
 export type SDUIComponentData = StringData | ButtonData | CardData | CarouselData;
 
 export interface StringData {
-  className: string;
+  className?: string;
+  style?: CSSProperties;
   kind: "string";
   text: string;
 }
 
 export interface ButtonData {
   className?: string;
+  style?: CSSProperties;
   kind: "button";
   text: string;
   action?: string; // has to be a string for serialisation
 }
 
 export interface CardData {
-  className: string;
+  className?: string;
+  style?: CSSProperties;
   kind: "card";
   header?: {
     title?: string;
@@ -26,7 +31,8 @@ export interface CardData {
 }
 
 export interface CarouselData {
-  className: string;
+  className?: string;
+  style?: CSSProperties;
   kind: "carousel";
   items: Array<SDUIComponentData>; 
 }
