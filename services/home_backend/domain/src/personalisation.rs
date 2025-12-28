@@ -1,5 +1,6 @@
 use std::ops::Deref;
 
+use serde::Deserialize;
 use uuid::Uuid;
 
 use anyhow::{Context, Result};
@@ -8,7 +9,7 @@ use super::UserID;
 
 // To clarify that None means it is not personalised but generic
 // Newtype so I can turn it into a string and back in one place
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, utoipa::ToSchema, Deserialize)]
 pub struct Personalisation(pub Option<UserID>);
 
 const GENERIC_USER_ID: &str = "GENERIC";

@@ -17,7 +17,7 @@ pub trait WidgetRepository {
     fn get_cached_users(&self) -> impl Future<Output = Result<HashSet<UserID>>> + Send;
 
     /// Update or insert a new widget.
-    fn upsert(&mut self, widget: &Widget) -> impl Future<Output = Result<()>> + Send;
+    fn upsert(& self, widget: &Widget) -> impl Future<Output = Result<()>> + Send;
 
     /// Remove a widget entry
     fn remove(

@@ -45,7 +45,7 @@ async fn main() -> anyhow::Result<()> {
     let (app, api) = OpenApiRouter::new()
         .fallback_service(ServeDir::new(dist_path))
         .routes(routes!(routes::get_recommendations))
-        .routes(routes!(routes::get_cached_users))
+        .routes(routes!(routes::set_recommendation))
         .split_for_parts();
 
     let mut home_service = HomeService {

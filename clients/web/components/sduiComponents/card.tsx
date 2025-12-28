@@ -15,10 +15,10 @@ export function SDUICard({ data }: { data: import("@/app/sdui").CardData }) {
     <Card className={cn("h-full", data.className)} style={data.style}>
       {data.header && (
         <CardHeader>
-          {data.header.title && <CardTitle>{data.header.title}</CardTitle>}
+          {data.header.title && <CardTitle className="line-clamp-2">{data.header.title}</CardTitle>}
 
           {data.header.description && (
-            <CardDescription>{data.header.description}</CardDescription>
+            <CardDescription className="line-clamp-2">{data.header.description}</CardDescription>
           )}
 
           {data.header.action && (
@@ -30,7 +30,7 @@ export function SDUICard({ data }: { data: import("@/app/sdui").CardData }) {
       )}
 
       {data.content && (
-        <CardContent className="h-full">
+        <CardContent className="flex-1">
           <SDUIRenderer data={data.content} />
         </CardContent>
       )}

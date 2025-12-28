@@ -1,8 +1,11 @@
 use crate::app_error::AppError;
 
 use super::AppState;
+use axum::response::ErrorResponse;
 use domain::Personalisation;
+use domain::Product;
 use domain::UserID;
+use domain::Widget;
 use domain::WidgetRepository;
 
 use axum::extract;
@@ -19,7 +22,6 @@ pub(crate) struct Recommendations {
 }
 
 // In a real environment this would be authenticated and authorised
-
 #[tracing::instrument]
 #[axum::debug_handler] // no effect in release profile
 #[utoipa::path(get,
@@ -31,7 +33,7 @@ pub(crate) struct Recommendations {
 pub(crate) async fn get_recommendations(
     State(state): State<AppState>,
     extract::Path(user_id): extract::Path<Uuid>,
-) -> response::Result<axum::Json<Recommendations>> {
+) -> Result<axum::Json<Recommendations>, AppError> {
     let personalisation = Personalisation(Some(UserID(user_id)));
     let recs = state
         .home_service
@@ -51,19 +53,50 @@ pub(crate) async fn get_recommendations(
     }))
 }
 
-// here we return a String for legibility but in a real prod system I would send bytes to halve the size
-
 #[tracing::instrument]
-#[axum::debug_handler]
-#[utoipa::path(get, path = "/get_cached_users")]
-pub(crate) async fn get_cached_users(State(state): State<AppState>) -> response::Result<String> {
-    Ok(state
+#[axum::debug_handler] // no effect in release profile
+#[utoipa::path(post,
+    path = "/set_recommendation/{product}/{user_id}/{sdui_data}",
+    responses(
+        (status = OK)
+    ),
+)]
+pub(crate) async fn set_recommendation(
+    State(state): State<AppState>,
+    extract::Path((product, personalisation, sdui_data)): extract::Path<(
+        Product,
+        Personalisation,
+        String,
+    )>,
+) -> response::Result<()> {
+    let widget = Widget {
+        product,
+        data: sdui_data,
+        personalisation,
+    };
+
+    state
         .home_service
         .widget_cache
-        .get_cached_users()
+        .upsert(&widget)
         .await
-        .map_err(AppError)?
-        .iter()
-        .map(|id| id.0.to_string() + "\n")
-        .collect())
+        .map_err(|e| AppError(e).into())
 }
+
+// NOTE: I decided against this function in the end as it will be too slow and the transmitted data too large.
+// TLDR It does not scale well.
+// here we return a String for legibility but in a real prod system I would send bytes to halve the size
+// #[tracing::instrument]
+// #[axum::debug_handler]
+// #[utoipa::path(get, path = "/get_cached_users")]
+// pub(crate) async fn get_cached_users(State(state): State<AppState>) -> response::Result<String> {
+//     Ok(state
+//         .home_service
+//         .widget_cache
+//         .get_cached_users()
+//         .await
+//         .map_err(AppError)?
+//         .iter()
+//         .map(|id| id.0.to_string() + "\n")
+//         .collect())
+// }

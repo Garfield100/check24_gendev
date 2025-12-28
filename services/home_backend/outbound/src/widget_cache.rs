@@ -161,7 +161,9 @@ impl WidgetRepository for WidgetCache {
 
         // if at this point we are still missing some product widgets, we have to fall back on the generic one
         for product in l2_missing {
-            // TODO send in request to product backend?
+            //
+            //  This is where we would send requests to the backends, ideally after we coalesce them
+            //
             let generic_widget = Widget {
                 product,
                 data: load_widget_generic(product).to_string(),
@@ -179,7 +181,7 @@ impl WidgetRepository for WidgetCache {
     }
 
     #[tracing::instrument]
-    async fn upsert(&mut self, widget: &Widget) -> Result<()> {
+    async fn upsert(& self, widget: &Widget) -> Result<()> {
         let user_id_string = String::from(&widget.personalisation);
 
         let l1_fut = self.l1.insert(

@@ -12,7 +12,7 @@ pub use strum::VariantArray;
 pub use widget::Widget;
 pub use widget_repository::WidgetRepository;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, utoipa::ToSchema)]
 pub struct UserID(pub Uuid);
 
 #[derive(Debug)]

@@ -16,6 +16,7 @@ use strum::VariantArray;
     serde::Deserialize,
     VariantArray,
     strum::Display,
+    utoipa::ToSchema
 )]
 pub enum Product {
     Travel,
