@@ -1,6 +1,21 @@
 # GenDev
 
+Deployed at:
+Password:
+
 [Concept](CONCEPT.md)
+[Dev integration guide](DEVELOPER_GUIDELINE.md)
+
+Build dependencies:
+* [The Rust toolchain](https://rust-lang.org/tools/install/)
+* [Just (command runner)](https://github.com/casey/just)
+* Docker just for Valkey, didn't have time to containerise the rest :(
+
+If you don't want to install Just you can also just open the `Justfile`s and run the commands within.
+
+To run:
+1. Run Valkey with `just run_valkey`
+2. Either detatch or open a new terminal and run `just run_home` and enjoy the warmth from your CPU
 
 
 ## Image attributions

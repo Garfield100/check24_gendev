@@ -1,22 +1,6 @@
-# Temp Notes
-<!-- TODO finalise -->
+# Architectural choices
 
-* cache for each user's personalised product info:
-  * key: (user, product)
-  * value: personalised product info
-* To show results immediately, maintain a generic, non-personalised product info in cache for each service
-
-* openapi with utoipa & friends
-* domain trait alla Zed
-
-* recommendation api should be one aggregated request for all products (i.e. the client does not send one request per product but only one for the user)
-
-* data collection? What e.g. behavioural analytics should maybe be reported back to products & how? Is this in scope of the challenge?
-  * scope: "conversion takes more than speed", "creativity"
-
-## Architectural choices
-
-### Hexagonal architecture pattern
+## Hexagonal architecture pattern
 
 Within the home backend service,
 
@@ -27,12 +11,12 @@ Within the home backend service,
 This nicely separates infrastructure, public-facing APIs, and business logic, thereby increasing maintainability while reducing potential attack surfaces.
 Note that my PoC does not include any kind of authentication or authorisation past the simple nginx password. I trust that your internal and user authentication and authorisation are solved problems.
 
-### OpenAPI
+## OpenAPI
 
 I used the Utoipa crate to automatically generate OpenAPI specs and host a Swagger UI.
 
 
-### Caches
+## Caches
 
 Going with two caches:
 
@@ -53,7 +37,7 @@ Going with two caches:
   
 Both caches essentially map a (Product, User) tuple to a widget. In my implementation the L1 cache uses exactly such a tuple as key while the L2 cache makes use of Valkey's "hashes".
 
-### Server-driven UI
+## Server-driven UI
 
 * pre-rendered HTML would be maximally flexible in web browsers but wouldn't work well with the native phone app if that must be written in kotlin and not a glorified web browser.
 * SDUI uses JSON description of UI to communicate the UI between back-end and front-ends. A front-end then renders using this more abstract JSON description. The same front end can render very different looking UIs if the JSON specifies it -> "content updates can and should remain dynamic"
