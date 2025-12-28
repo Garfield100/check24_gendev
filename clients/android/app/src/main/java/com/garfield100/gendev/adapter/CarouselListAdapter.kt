@@ -3,7 +3,6 @@ package com.garfield100.gendev.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.garfield100.gendev.databinding.CarouselListItemBinding
 import com.garfield100.gendev.model.Carousel
@@ -34,8 +33,6 @@ class CarouselListAdapter(private val carousels: List<Carousel>) :
             binding.carouselRecyclerview.apply {
                 layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
                 adapter = CarouselItemAdapter(carousel.items)
-                onFlingListener = null
-                LinearSnapHelper().attachToRecyclerView(this)
             }
         }
     }

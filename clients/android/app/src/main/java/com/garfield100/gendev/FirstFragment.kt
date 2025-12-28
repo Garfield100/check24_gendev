@@ -35,14 +35,14 @@ class FirstFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val carousels = createDummyData()
+        val carousels = getSDUIData()
         binding.carouselsRecyclerview.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = CarouselListAdapter(carousels)
         }
     }
 
-    private fun createDummyData(): List<Carousel> {
+    private fun getSDUIData(): List<Carousel> {
         return listOf(
             Carousel(
                 "Carousel 1",
