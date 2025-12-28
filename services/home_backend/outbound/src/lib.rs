@@ -1,14 +1,8 @@
 mod widget_cache;
 pub use widget_cache::WidgetCache;
 
-use std::{sync::Arc, time::Duration};
 
-use anyhow::Result;
-use dashmap::DashMap;
-use domain::{Personalisation, Product, Widget, WidgetRepository};
-use fred::{clients::Pool, prelude::*};
 
-use assert2::{assert, check};
 
 #[tokio::test]
 async fn test_new() -> Result<()> {

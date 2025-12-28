@@ -5,7 +5,18 @@ use strum::VariantArray;
 // The alternative would be some dynamic configuration values being read on a file change,
 // however this shouldn't happen too often and most of the human effort of changing text would remain anyway,
 // so I believe the type safety is worth it.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, VariantArray)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    serde::Serialize,
+    serde::Deserialize,
+    VariantArray,
+    strum::Display,
+)]
 pub enum Product {
     Travel,
     CarInsurance,
@@ -15,9 +26,7 @@ pub enum Product {
 
 impl From<Product> for String {
     fn from(value: Product) -> Self {
-        // If product is an enum this cannot fail so unwrapping is safe
-        serde_json::to_string(&value)
-            .unwrap_or_else(|err| panic!("Could not turn Product {value:?} into String: {err}"))
+        value.to_string()
     }
 }
 

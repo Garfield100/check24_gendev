@@ -4,26 +4,48 @@ use domain::Product;
 
 use anyhow::Result;
 use domain::Personalisation;
+use domain::UserID;
 use domain::VariantArray;
 use domain::Widget;
 use domain::WidgetRepository;
 use fred::prelude::*;
-use parking_lot::RwLock;
-use quick_cache::sync::Cache;
-use std::collections::HashMap;
+use moka::Expiry;
+use moka::future::CacheBuilder;
 use std::collections::HashSet;
 use std::hash::Hash;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::task::JoinSet;
+use uuid::Uuid;
 
-// TODO: at what point (N of Products) is a simple list faster than a hashmap?
-type NestedMap<K1, K2, V> = Cache<K1, HashMap<K2, V>>;
+use moka::future::Cache;
+
+#[derive(Debug, Hash, PartialEq, Eq)]
+struct L1Key(Personalisation, Product);
+const CACHED_USERS_SET: &str = "cached_users";
 
 #[derive(Debug, Clone)]
 pub struct WidgetCache {
-    l1: Arc<NestedMap<Personalisation, Product, Widget>>,
-    l2: Pool, // Pool type already an Arc
+    l1: Cache<L1Key, Widget>,
+    l2: Pool,
+}
+
+// TODO config value?
+const GENERIC_CACHE_DURATION: Duration = Duration::from_secs(5);
+pub(crate) struct ExpireGeneric {}
+
+impl Expiry<L1Key, Widget> for ExpireGeneric {
+    fn expire_after_create(
+        &self,
+        _key: &L1Key,
+        value: &Widget,
+        _created_at: std::time::Instant,
+    ) -> Option<Duration> {
+        if let Personalisation(None) = value.personalisation {
+            Some(GENERIC_CACHE_DURATION)
+        } else {
+            None
+        }
+    }
 }
 
 impl WidgetCache {
@@ -48,74 +70,83 @@ impl WidgetCache {
             .await
             .with_context(|| "Failed to connect to valkey")?;
 
-        let l1 = Cache::new(10_000);
+        let l1 = CacheBuilder::<_, Widget, _>::new(10_000_000) // max size approx. in bytes
+            .name("Home_Service_L1_Cache")
+            .expire_after(ExpireGeneric {})
+            .weigher(|_, v| v.data.len() as u32) // weigh entries by their byte length so that (barring key size) max size is roughly in bytes
+            .build();
 
-        Ok(Self {
-            l1: Arc::new(l1),
-            l2: pool,
-        })
+        Ok(Self { l1, l2: pool })
+    }
+
+    async fn register_user_as_cached(&self, UserID(user_uuid): &UserID) -> Result<()> {
+        self.l2
+            .sadd::<(), &str, &[u8]>(CACHED_USERS_SET, user_uuid.as_bytes())
+            .await.with_context(|| format!("Failed to register user {user_uuid} to Valkey hashset of cached users using SADD"))
     }
 }
 
-trait HashKey: Eq + Hash + Clone {}
-
-impl<T: Eq + Hash + Clone> HashKey for T {}
-
-async fn l1_upsert<K1, K2, V>(cache: Arc<NestedMap<K1, K2, V>>, k1: &K1, k2: K2, value: V)
-where
-    K1: HashKey,
-    K2: HashKey,
-    V: Clone,
-{
-    match cache.get_value_or_guard_async(k1).await {
-        Result::Ok(mut res) => {
-            res.insert(k2, value);
-        }
-        // if the value isn't already present, quick_cache gives us a guard in the Err variant so we can initialise our value.
-        Err(guard) => {
-            // TODO see if a faster hasher is worth it here via HashMap::with_hasher or just a Vec or Product-sized array
-            let mut map = HashMap::new();
-            map.insert(k2, value);
-            // let _ because we don't care about the old value, which quick_cache returns as a Result::Err variant
-            let _ = guard.insert(map);
-        }
-    };
-}
-
 impl WidgetRepository for WidgetCache {
+    // TODO break out into smaller functions
+    #[tracing::instrument]
     async fn get_widgets_for_user(
         &self,
         personalisation: &Personalisation,
     ) -> Result<Vec<Widget>, anyhow::Error> {
-        let mut widgets: Vec<Widget> = if let Some(res) = self.l1.get(personalisation) {
-            // cache hit
-            Ok(res.values().cloned().collect())
-        } else {
-            let personalisation = personalisation.clone();
+        if let Personalisation(Some(user_id)) = personalisation {
+            self.register_user_as_cached(user_id).await?;
+        }
+
+        let (l1_widgets, l1_missing) = self.l1_get_all(personalisation.clone()).await;
+        let mut widgets = l1_widgets;
+        let mut l2_missing: Vec<Product> = Vec::new();
+
+        // if any product entries are still missing, we try to grab the them from Valkey
+        if !l1_missing.is_empty() {
             // cache miss, get from Valkey
-            self.l2
-                // type info: hgetall::<Vec<Product, Widget>, UserID> (oddly it's Value type then Key type)
-                .hgetall::<Vec<(String, String)>, String>(String::from(&personalisation))
-                .await?
+            let personalisation = personalisation.clone();
+            let l1_missing_str: Vec<String> =
+                l1_missing.iter().cloned().map(String::from).collect();
+
+            let missing_res: Vec<Widget> = self
+                .l2
+                // type info: hmget::<Vec<Option<Widget-string>>, UserID, Vec<Product-string>> (oddly it's Value type then Key type)
+                // Option<String> because Valkey returns nil values for the fields it doesn't have
+                .hmget::<Vec<Option<String>>, String, Vec<String>>(
+                    String::from(&personalisation),
+                    l1_missing_str,
+                )
+                .await
+                .context("Error while HMGETing widgets for user")?
                 .into_iter()
-                // here we clone a value and an arc so that they can be moved into the following async closure
-                .map(|(product_string, widget_data)| {
+                .zip(l1_missing) // zip the products we queried with back in
+                .filter_map(|(widget_data, product)| {
+                    if let Some(widget_data) = widget_data {
+                        Some((widget_data, product))
+                    } else {
+                        l2_missing.push(product);
+                        None
+                    }
+                })
+                .map(|(widget_data, product)| {
                     (
+                        // here we clone a value and an arc (moka Cache) so that they can be moved into the following async closure
                         personalisation.clone(),
                         self.l1.clone(),
-                        product_string,
+                        product,
                         widget_data,
                     )
                 })
-                .map(async |(personalisation, l1, product_string, widget_data)| {
-                    let product = Product::try_from(product_string)?;
+                .map(async move |(personalisation, l1, product, widget_data)| {
                     let widget = Widget {
                         data: widget_data,
                         personalisation: personalisation.clone(),
                         product,
                     };
 
-                    l1_upsert(l1, &personalisation, product, widget.clone()).await;
+                    // put stuff we found back up into higher cache
+                    l1.insert(L1Key(personalisation, product), widget.clone())
+                        .await;
 
                     Ok(widget)
                 })
@@ -123,83 +154,123 @@ impl WidgetRepository for WidgetCache {
                 .join_all()
                 .await
                 .into_iter()
-                .collect()
-        }?;
+                .collect::<Result<Vec<_>, _>>()?;
 
-        // if we don't have data for all products yet, we have to fall back to the generic ones
-        if widgets.len() < Product::VARIANTS.len() {
-            let mut all_widgets = Vec::with_capacity(Product::VARIANTS.len());
-            let mut missing_widgets = Vec::new();
-            for product in Product::VARIANTS {
-                let widget_or_generic = widgets
-                    .iter()
-                    .find(|w| w.product == *product)
-                    .cloned()
-                    .unwrap_or_else(|| {
-                        let w = Widget {
-                            product: *product,
-                            data: load_widget_generic(product).to_string(),
-                            personalisation: Personalisation(None),
-                        };
-                        missing_widgets.push(w.clone());
-                        w
-                    });
-                all_widgets.push(widget_or_generic);
-            }
-            widgets = all_widgets;
+            widgets.extend(missing_res);
+        };
 
-            for w in missing_widgets.into_iter() {
-                // TODO request these from the respective backend
-
-                // insert the generic widget into the l1 cache for now
-                l1_upsert(self.l1.clone(), personalisation, w.product, w).await;
-            }
+        // if at this point we are still missing some product widgets, we have to fall back on the generic one
+        for product in l2_missing {
+            // TODO send in request to product backend?
+            let generic_widget = Widget {
+                product,
+                data: load_widget_generic(product).to_string(),
+                personalisation: Personalisation(None),
+            };
+            widgets.push(generic_widget.clone());
+            // put these generic ones into L1 as well
+            // our ExpireGeneric policy evicts these after a few seconds
+            self.l1
+                .insert(L1Key(Personalisation(None), product), generic_widget)
+                .await;
         }
 
         Ok(widgets)
     }
 
+    #[tracing::instrument]
     async fn upsert(&mut self, widget: &Widget) -> Result<()> {
         let user_id_string = String::from(&widget.personalisation);
 
-        l1_upsert(
-            self.l1.clone(),
-            &widget.personalisation,
-            widget.product,
+        let l1_fut = self.l1.insert(
+            L1Key(widget.personalisation.clone(), widget.product),
             widget.clone(),
-        )
-        .await;
+        );
 
-        self.l2
-            .hset::<(), _, _>(user_id_string, (String::from(widget.product), &widget.data))
-            .await
-            .with_context(|| format!("Failed to upsert {widget:?}"))
+        let user_fut = async {
+            if let Personalisation(Some(user_id)) = &widget.personalisation {
+                self.register_user_as_cached(user_id).await
+            } else {
+                Ok(())
+            }
+        };
+
+        let l2_fut = self
+            .l2
+            .hset::<(), _, _>(user_id_string, (String::from(widget.product), &widget.data));
+
+        let (_, user_res, l2_res) = tokio::join!(l1_fut, user_fut, l2_fut);
+
+        user_res?;
+        l2_res?;
+
+        Ok(())
     }
 
+    #[tracing::instrument]
     async fn remove(&mut self, product: Product, personalisation: &Personalisation) -> Result<()> {
-        self.l1.get(personalisation).map(|mut m| m.remove(&product));
+        let key = L1Key(personalisation.clone(), product); // we love lifetime analysis
+        let l1_fut = self.l1.invalidate(&key);
 
-        self.l2
-            .hdel::<(), _, _>(String::from(personalisation), String::from(product))
-            .await
-            .with_context(|| {
-                format!(
-                    "Error while removing entry for product {product:?} and user {}",
-                    String::from(personalisation)
-                )
-            })
+        let l2_fut = self
+            .l2
+            .hdel::<(), _, _>(String::from(personalisation), String::from(product));
+
+        let (_, l2_res) = tokio::join!(l1_fut, l2_fut);
+
+        l2_res?;
+
+        Ok(())
     }
 
+    #[tracing::instrument]
     async fn clear(&mut self) -> Result<()> {
-        self.l1.clear();
+        self.l1.invalidate_all();
 
         let _: bool = self.l2.flushall(true).await?;
 
         Ok(())
     }
+
+    #[tracing::instrument]
+    async fn get_cached_users(&self) -> Result<HashSet<domain::UserID>> {
+        Ok(self
+            .l2
+            .smembers::<Vec<[u8; 16]>, _>(CACHED_USERS_SET)
+            .await?
+            .into_iter()
+            .map(Uuid::from_bytes)
+            .map(UserID)
+            .collect())
+    }
 }
 
-const fn load_widget_generic(product: &Product) -> &'static str {
+impl WidgetCache {
+    /// Gets l1 cache contents for as many products as it contains and returns them,
+    /// along with a list of products for which no widget was found.
+    ///
+    /// This is so we can fill in the missing ones with generic ones later.
+    #[tracing::instrument]
+    async fn l1_get_all(&self, personalisation: Personalisation) -> (Vec<Widget>, Vec<Product>) {
+        let mut cached_widgets = Vec::new();
+        let mut missing_products = Vec::new();
+        for product in Product::VARIANTS {
+            let key = L1Key(personalisation.clone(), *product);
+            // this is currently not in parallel as we have very few products. As this increases it might be worth it to use something like an async stream
+            match self.l1.get(&key).await {
+                Some(widget) => cached_widgets.push(widget),
+                None => missing_products.push(*product),
+            }
+        }
+
+        (cached_widgets, missing_products)
+    }
+}
+
+/// Just loads in some example widgets as generic ones for each product.
+/// This is compiled-in here since I am simulating the product backends anyway,
+/// but in a prod system this would come from those backends.
+const fn load_widget_generic(product: Product) -> &'static str {
     match product {
         Product::Travel => include_str!("../assets/generic_travel.json"),
         Product::CarInsurance => include_str!("../assets/generic_car_insurance.json"),
