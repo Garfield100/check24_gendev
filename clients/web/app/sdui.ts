@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 
-export type SDUIComponentData = StringData | ButtonData | CardData | CarouselData;
+export type SDUIComponentData = StringData | ButtonData | CardData | CarouselData | ImageData;
 
 export interface StringData {
   className?: string;
@@ -34,5 +34,16 @@ export interface CarouselData {
   className?: string;
   style?: CSSProperties;
   kind: "carousel";
+  title: string
   items: Array<SDUIComponentData>; 
+}
+
+export interface ImageData {
+  className?: string;
+  style?: CSSProperties;
+  kind: "image";
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
 }

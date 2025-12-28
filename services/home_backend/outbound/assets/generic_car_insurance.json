@@ -1,19 +1,18 @@
 {
   "kind": "carousel",
-  "className": "",
+  "title": "Car Insurance",
   "items": [
     {
       "kind": "card",
-      "className": "",
       "header": {
         "title": "VW Golf VII",
         "description": "Haftpflicht + Teilkasko",
         "action": {}
       },
       "content": {
-        "kind": "string",
-        "className": "",
-        "text": "Save up to €250/year"
+        "kind": "image",
+        "src": "/card-images/martin-katler-1iVJkBGy6OY-unsplash.jpg",
+        "alt": "A VW Golf 7 in the snow"
       },
       "footer": {
         "kind": "button",
@@ -23,20 +22,19 @@
     },
     {
       "kind": "card",
-      "className": "",
       "header": {
-        "title": "Tesla Model 3",
+        "title": "Mercedes AMG",
         "description": "Vollkasko protection"
       },
       "content": {
-        "kind": "string",
-        "className": "",
-        "text": "Tariffs from €18.50/month"
+        "kind": "image",
+        "src": "/card-images/hakon-sataoen-qyfco1nfMtg-unsplash.jpg",
+        "alt": "A Mercedes AMG car on a road in nature"
       },
       "footer": {
         "kind": "button",
         "text": "View Offers",
-        "action": "/insurance/car/compare/tesla-m3"
+        "action": "/insurance/car/compare/mercedes"
       }
     }
   ]

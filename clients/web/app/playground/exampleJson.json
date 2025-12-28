@@ -1,39 +1,41 @@
 {
   "kind": "carousel",
+  "title": "Horse Insurance",
   "items": [
     {
       "kind": "card",
-      "style": {
-        "backgroundColor": "skyblue"
-      },
+      "className": "",
       "header": {
-        "title": "VW Golf VII",
-        "description": "Haftpflicht + Teilkasko"
+        "title": "Horse Liability",
+        "description": "Basic Protection"
       },
       "content": {
-        "kind": "string",
-        "text": "Save up to €250/year"
+        "kind": "image",
+        "src": "/card-images/annika-treial-e4WUwbcur7Y-unsplash.jpg",
+        "alt": "3 horses playing in a field"
       },
       "footer": {
         "kind": "button",
-        "text": "View",
-        "action": "/insurance/car/compare/vw-golf"
+        "text": "Calculate",
+        "action": "/insurance/horse/liability"
       }
     },
     {
       "kind": "card",
+      "className": "",
       "header": {
-        "title": "Tesla Model 3",
-        "description": "Vollkasko protection"
+        "title": "Surgery Cover (OP)",
+        "description": "100% cost coverage, no limit"
       },
       "content": {
-        "kind": "string",
-        "text": "Tariffs from €18.50/month"
+        "kind": "image",
+        "src": "/card-images/helena-lopes-Y5iPU37b7Zs-unsplash.jpg",
+        "alt": "A white horse in a garden facing the left"
       },
       "footer": {
         "kind": "button",
-        "text": "View",
-        "action": "/insurance/car/compare/tesla-m3"
+        "text": "View Details",
+        "action": "/insurance/horse/surgery"
       }
     }
   ]

@@ -15,7 +15,7 @@ export default function Home() {
         const res = await fetch("/get_recommendations/3fa85f64-5717-4562-b3fc-2c963f66afa6");
         const json = await res.json();
 
-        const parsedWidgets = Object.values(json.recs_by_product).map((widgetStr: any) =>
+          const parsedWidgets = Object.values(json.recs_by_product).map((widgetStr: any) =>
           JSON.parse(widgetStr)
         );
 

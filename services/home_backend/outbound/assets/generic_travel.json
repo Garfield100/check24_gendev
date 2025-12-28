@@ -1,6 +1,6 @@
 {
   "kind": "carousel",
-  "className": "",
+  "title": "Travel Ideas",
   "items": [
     {
       "kind": "card",
@@ -11,9 +11,9 @@
         "action": {}
       },
       "content": {
-        "kind": "string",
-        "className": "",
-        "text": "Direct flights from €120"
+        "kind": "image",
+        "src": "/card-images/anthony-delanoix-Q0-fOL2nqZc-unsplash.jpg",
+        "alt": "The Eiffel Tower in Paris"
       },
       "footer": {
         "kind": "button",
@@ -29,9 +29,9 @@
         "description": "Ancient Temples & Nature"
       },
       "content": {
-        "kind": "string",
-        "className": "",
-        "text": "Spring Sale: -15% off"
+        "kind": "image",
+        "src": "/card-images/romeo-a-SlIl9eZjWUc-unsplash.jpg",
+        "alt": "A Japanese temple-tower in Kyoto"
       },
       "footer": {
         "kind": "button",
@@ -43,18 +43,18 @@
       "kind": "card",
       "className": "",
       "header": {
-        "title": "New York, USA",
-        "description": "The City That Never Sleeps"
+        "title": "Rome, Italy",
+        "description": "The City Of Love"
       },
       "content": {
-        "kind": "string",
-        "className": "",
-        "text": "Package deals: Flight + Hotel"
+        "kind": "image",
+        "src": "/card-images/david-kohler-VFRTXGw1VjU-unsplash.jpg",
+        "alt": "The Colosseum in Rome"
       },
       "footer": {
         "kind": "button",
         "text": "Explore",
-        "action": "/travel/nyc"
+        "action": "/travel/rome"
       }
     }
   ]

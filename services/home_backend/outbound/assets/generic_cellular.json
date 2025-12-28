@@ -1,6 +1,6 @@
 {
   "kind": "carousel",
-  "className": "",
+  "title": "Cellular Data",
   "items": [
     {
       "kind": "card",
@@ -10,9 +10,9 @@
         "description": "Vodafone Network"
       },
       "content": {
-        "kind": "string",
-        "className": "",
-        "text": "€9.99 / month - Cancel monthly"
+        "kind": "image",
+        "src": "/card-images/brett-jordan-NS-lboO5wak-unsplash.jpg",
+        "alt": "An old iphone with its SIM port open"
       },
       "footer": {
         "kind": "button",
@@ -28,9 +28,9 @@
         "description": "Telekom Network"
       },
       "content": {
-        "kind": "string",
-        "className": "",
-        "text": "High speed internet, flat telephony"
+        "kind": "image",
+        "src": "/card-images/user_pascal-7qlXFeFNv14-unsplash.jpg",
+        "alt": "A SIM-Card broken out of its plastic sizing frames"
       },
       "footer": {
         "kind": "button",
@@ -46,9 +46,9 @@
         "description": "O2 Network"
       },
       "content": {
-        "kind": "string",
-        "className": "",
-        "text": "€10 starting credit included"
+        "kind": "image",
+        "src": "/card-images/user_pascal-fcYNLhYAd5k-unsplash.jpg",
+        "alt": "A SIM-Card still in its credit-card-sized frame"
       },
       "footer": {
         "kind": "button",

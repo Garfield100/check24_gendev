@@ -21,7 +21,6 @@ export function SDUICard({ data }: { data: import("@/app/sdui").CardData }) {
             <CardDescription>{data.header.description}</CardDescription>
           )}
 
-          {/* Recursive rendering for the header action */}
           {data.header.action && (
             <div className="mt-2">
               <SDUIRenderer data={data.header.action} />
@@ -30,14 +29,12 @@ export function SDUICard({ data }: { data: import("@/app/sdui").CardData }) {
         </CardHeader>
       )}
 
-      {/* Recursive rendering for content */}
       {data.content && (
-        <CardContent>
+        <CardContent className="h-full">
           <SDUIRenderer data={data.content} />
         </CardContent>
       )}
 
-      {/* Recursive rendering for footer */}
       {data.footer && (
         <CardFooter>
           <SDUIRenderer data={data.footer} />
