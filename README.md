@@ -1,7 +1,8 @@
 # GenDev
 
 Deployed at:
-Password:
+Username: `gendev`
+Password: `8gwAZcCJvgMXxcyDDpMhm2dbhKk3NV5B`
 
 [Concept](CONCEPT.md)
 [Dev integration guide](DEVELOPER_GUIDELINE.md)
