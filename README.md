@@ -6,6 +6,7 @@ Password: `8gwAZcCJvgMXxcyDDpMhm2dbhKk3NV5B`
 Video: <https://youtu.be/pBdHTp7gnC4>
 
 [Concept](CONCEPT.md)
+
 [Dev integration guide](DEVELOPER_GUIDELINE.md)
 
 Build dependencies:
@@ -17,7 +18,7 @@ If you don't want to install Just you can also just open the `Justfile`s and run
 
 To run:
 1. Run Valkey with `just run_valkey`
-2. Either detatch or open a new terminal and run `just run_home` and enjoy the warmth from your CPU
+2. Either detatch or open a new terminal and run `just run_home` and enjoy the warmth from your CPU as it compiles. Once that's done it will start running.
 
 
 ## Image attributions
