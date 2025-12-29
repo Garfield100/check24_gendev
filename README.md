@@ -1,8 +1,11 @@
 # GenDev
 
 Deployed at: <https://gendev.garfield100.net/>
+
 Username: `gendev`
+
 Password: `8gwAZcCJvgMXxcyDDpMhm2dbhKk3NV5B`
+
 Video: <https://youtu.be/pBdHTp7gnC4>
 
 [Concept](CONCEPT.md)
