@@ -1,12 +1,5 @@
 # GenDev
-
-Deployed at: <https://gendev.garfield100.net/>
-
-Username: `gendev`
-
-Password: `8gwAZcCJvgMXxcyDDpMhm2dbhKk3NV5B`
-
-Video: <https://youtu.be/pBdHTp7gnC4>
+This was my entry into GenDev 2025 :)
 
 [Concept](CONCEPT.md)
 
